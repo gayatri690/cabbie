@@ -1,7 +1,6 @@
 package com.cabbie.user.userprofile.controller;
 
 import com.cabbie.user.userprofile.dto.UserRequest;
-import com.cabbie.user.userprofile.entity.User;
 import com.cabbie.user.userprofile.service.UserRegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
