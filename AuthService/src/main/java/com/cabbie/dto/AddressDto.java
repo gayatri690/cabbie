@@ -1,9 +1,9 @@
-package com.cabbie.user.userprofile.dto;
+package com.cabbie.dto;
 
 import lombok.Data;
 
 @Data
-public class Address_Dto {
+public class AddressDto {
 
     public Long id;
     private String street;

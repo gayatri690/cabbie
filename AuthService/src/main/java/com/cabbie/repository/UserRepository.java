@@ -1,9 +1,12 @@
-package com.cabbie.user.userprofile.repository;
+package com.cabbie.repository;
 
-import com.cabbie.user.userprofile.entity.User;
+import com.cabbie.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
 }

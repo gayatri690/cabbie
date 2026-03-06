@@ -1,13 +1,14 @@
-package com.cabbie.user.userprofile.dto;
+package com.cabbie.dto;
 
 import lombok.Data;
 
 @Data
-public class UserRequest {
+public class RegisterRequest {
 
     private String firstName;
     private String lastName;
     private String email;
     private String phone;
-    private Address_Dto addressDto;
+    private String password;
+    private AddressDto addressDto;
 }

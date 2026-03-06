@@ -1,4 +1,4 @@
-package com.cabbie.user.userprofile.utility;
+package com.cabbie.enums;
 
 public enum Role {
     PASSENGER, DRIVER, ADMIN
