@@ -5,6 +5,7 @@ import com.cabbie.dto.LoginRequest;
 import com.cabbie.dto.RegisterRequest;
 import com.cabbie.entity.Address;
 import com.cabbie.entity.User;
+import com.cabbie.enums.Role;
 import com.cabbie.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,7 +50,8 @@ public class AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
 
-        String token = jwtService.generateToken(userDetails);
+        //String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(userDetails, user.getUserrole().name());
 
         return new AuthResponse(token);
     }
@@ -60,7 +62,9 @@ public class AuthService {
         user.setLastName(userRequest.getLastName());
         user.setEmail(userRequest.getEmail());
         user.setPhone(userRequest.getPhone());
-        //user.setPassword(userRequest.getPassword());
+        if(userRequest.getRole() != null){
+            user.setUserrole(Role.valueOf(userRequest.getRole().toString()));
+        }
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
         if(userRequest.getAddressDto() != null){

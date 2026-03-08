@@ -1,16 +1,17 @@
-package com.cabbie.dto;
+package com.cabbie.user.userprofile.dto;
 
-import com.cabbie.enums.Role;
+
+import com.cabbie.user.userprofile.enums.Role;
 import lombok.Data;
 
 @Data
-public class RegisterRequest {
+public class UserResponse {
 
+    private String id;
     private String firstName;
     private String lastName;
     private String email;
     private String phone;
-    private String password;
-    private String role;
+    private Role role;
     private AddressDto addressDto;
 }

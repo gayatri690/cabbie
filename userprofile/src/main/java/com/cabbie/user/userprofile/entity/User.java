@@ -1,6 +1,6 @@
 package com.cabbie.user.userprofile.entity;
 
-import com.cabbie.user.userprofile.utility.Role;
+import com.cabbie.user.userprofile.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -45,7 +45,7 @@ public class User {
     @PrePersist
     public void applyDefaultRole() {
         if (userrole == null) {
-            userrole = userrole.PASSENGER;
+            userrole = Role.PASSENGER;
         }
     }
 }
