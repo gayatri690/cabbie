@@ -1,14 +1,13 @@
 package com.cabbie.user.userprofile.controller;
 
 
+import com.cabbie.user.userprofile.dto.UserRequest;
 import com.cabbie.user.userprofile.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/users")
@@ -34,5 +33,15 @@ public class UserController {
 
     }
 
+
+    @PutMapping("/update-profile")
+    public ResponseEntity<String> updateProfile(@RequestBody UserRequest userRequest, Authentication authentication)
+    {
+        String email = authentication.getName();
+        boolean updateStatus = userService.updateUser(userRequest,email);
+        if(updateStatus)
+            return ResponseEntity.ok("User updated successfully");
+        return ResponseEntity.notFound().build();
+    }
 
 }
