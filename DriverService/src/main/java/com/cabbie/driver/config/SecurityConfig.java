@@ -1,6 +1,6 @@
-package com.cabbie.user.userprofile.config;
+package com.cabbie.driver.config;
 
-import com.cabbie.user.userprofile.service.JwtFilter;
+import com.cabbie.driver.service.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/findbyemail/**").permitAll()
-                        .requestMatchers("/users/**").authenticated()
+                        .requestMatchers("/driver/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

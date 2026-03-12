@@ -63,7 +63,7 @@ public class AuthService {
         user.setEmail(userRequest.getEmail());
         user.setPhone(userRequest.getPhone());
         if(userRequest.getRole() != null){
-            user.setUserrole(Role.valueOf(userRequest.getRole().toString()));
+            user.setUserrole(Role.valueOf(userRequest.getRole().toUpperCase()));
         }
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 

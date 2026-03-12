@@ -2,10 +2,10 @@ package com.cabbie.user.userprofile.controller;
 
 
 import com.cabbie.user.userprofile.dto.UserRequest;
+import com.cabbie.user.userprofile.dto.UserResponse;
 import com.cabbie.user.userprofile.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
@@ -33,7 +33,6 @@ public class UserController {
 
     }
 
-
     @PutMapping("/update-profile")
     public ResponseEntity<String> updateProfile(@RequestBody UserRequest userRequest, Authentication authentication)
     {
@@ -44,4 +43,8 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/findbyemail/{email}")
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.getUserByEmail(email));
+    }
 }
