@@ -20,8 +20,8 @@ public class Driver {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Reference to Auth Service User
-    @Column(nullable = false)
+    // Reference to User Service User
+    //@Column(nullable = false)
     private Long userId;
 
     // Vehicle details

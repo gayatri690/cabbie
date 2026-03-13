@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/auth/**
+
+        - id: user-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/users/**
+
+        - id: driver-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/driver/**
+
+jwt:
+  secret: mySecretKeyForJwtValidation123456

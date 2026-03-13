@@ -22,20 +22,19 @@ public class DriverService {
     public void registerDriver(String email, DriverRequest driverRequest) {
 
         UserResponse userResponse = userServiceClient.getUserByEmail(email);
-        if(userResponse.getRole() != Role.DRIVER){
+        if(!userResponse.getRole().equals(Role.DRIVER)){
             throw new RuntimeException("User is not a driver");
         }
 
         Driver driver = new Driver();
-        updateDriverFromRequest(driverRequest, driver);
+        updateDriverFromRequest(driverRequest, driver, userResponse.getId());
         driverRepository.save(driver);
     }
 
-    private void updateDriverFromRequest(DriverRequest driverRequest, Driver driver) {
+    private void updateDriverFromRequest(DriverRequest driverRequest, Driver driver, String id) {
 
-        if (driverRequest.getUserId() != null) {
-            driver.setUserId(driverRequest.getUserId());
-        }
+        driver.setUserId(Long.valueOf(id));
+
 
         if (driverRequest.getVehicleModel() != null) {
             driver.setVehicleModel(driverRequest.getVehicleModel());

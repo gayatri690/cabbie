@@ -7,7 +7,6 @@ import com.cabbie.user.userprofile.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/users")
@@ -17,26 +16,22 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(Authentication authentication)
-    {
-        String email = authentication.getName();
-
-        String role = authentication.getAuthorities()
-                .iterator()
-                .next()
-                .getAuthority();
+    public ResponseEntity<?> getProfile(
+            @RequestHeader("X-User-Email") String email,
+            @RequestHeader("X-User-Role") String role
+    ) {
 
         if(role.equals("ADMIN")){
             return ResponseEntity.ok(userService.getAllUsers());
         }
         return ResponseEntity.ok(userService.getUserByEmail(email));
-
     }
 
     @PutMapping("/update-profile")
-    public ResponseEntity<String> updateProfile(@RequestBody UserRequest userRequest, Authentication authentication)
+    public ResponseEntity<String> updateProfile(
+            @RequestBody UserRequest userRequest,
+            @RequestHeader("X-User-Email") String email)
     {
-        String email = authentication.getName();
         boolean updateStatus = userService.updateUser(userRequest,email);
         if(updateStatus)
             return ResponseEntity.ok("User updated successfully");
@@ -44,7 +39,8 @@ public class UserController {
     }
 
     @GetMapping("/findbyemail/{email}")
-    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email)
+    {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 }
