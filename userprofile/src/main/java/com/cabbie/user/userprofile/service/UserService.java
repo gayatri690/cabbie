@@ -1,21 +1,26 @@
 package com.cabbie.user.userprofile.service;
 
-import com.cabbie.user.userprofile.dto.AddressDto;
-import com.cabbie.user.userprofile.dto.UserRequest;
-import com.cabbie.user.userprofile.dto.UserResponse;
+import com.cabbie.user.userprofile.dto.*;
 import com.cabbie.user.userprofile.entity.Address;
+import com.cabbie.user.userprofile.entity.FavoriteLocation;
 import com.cabbie.user.userprofile.entity.User;
+import com.cabbie.user.userprofile.repository.FavoriteLocationRepository;
 import com.cabbie.user.userprofile.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FavoriteLocationRepository favoriteLocationRepository;
 
     public UserResponse getUserByEmail(String email) {
 
@@ -39,6 +44,55 @@ public class UserService {
                     userRepository.save(existinguser);
                     return true;
                 }).orElse(false);
+    }
+
+    public boolean updatePhoneNumber(String phone, String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        user.ifPresent(u -> {
+            u.setPhone(phone);
+            userRepository.save(u);
+        });
+        return user.isPresent();
+    }
+
+    public void addFavoriteLocation(FavoriteLocationRequest favoriteLocationRequest, String email) {
+        List<FavoriteLocation> locations = favoriteLocationRepository.findByEmail(email);
+        if(locations.size() >= 5){
+            throw new RuntimeException("Maximum favorite locations reached");
+        }
+        FavoriteLocation favoriteLocation = new FavoriteLocation();
+        mapTofavoriteLocation(favoriteLocationRequest, favoriteLocation, email);
+        favoriteLocationRepository.save(favoriteLocation);
+    }
+
+    public List<FavoriteLocationResponse> getFavoriteLocations(String email)
+    {
+        return favoriteLocationRepository.findByEmail(email)
+                .stream()
+                .map(this :: mapToFavoriteLocationsResponse)
+                .toList();
+    }
+
+    public void deleteAccount(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        userRepository.delete(user);
+    }
+
+    private FavoriteLocationResponse mapToFavoriteLocationsResponse(FavoriteLocation favoriteLocation) {
+        FavoriteLocationResponse favoriteLocationResponse = new FavoriteLocationResponse();
+        favoriteLocationResponse.setLocationName(favoriteLocation.getLocationName());
+        favoriteLocationResponse.setLongitude(favoriteLocation.getLongitude());
+        favoriteLocationResponse.setLatitude(favoriteLocation.getLatitude());
+        return favoriteLocationResponse;
+    }
+
+    private void mapTofavoriteLocation(FavoriteLocationRequest favoriteLocationRequest, FavoriteLocation favoriteLocation, String email) {
+        favoriteLocation.setEmail(email);
+        favoriteLocation.setLocationName(favoriteLocationRequest.getLocationName());
+        favoriteLocation.setLatitude(favoriteLocationRequest.getLatitude());
+        favoriteLocation.setLongitude(favoriteLocationRequest.getLongitude());
     }
 
     private UserResponse mapToResponse(User user) {
@@ -79,6 +133,7 @@ public class UserService {
             user.setAddress(address);
         }
     }
+
 
 
 }
