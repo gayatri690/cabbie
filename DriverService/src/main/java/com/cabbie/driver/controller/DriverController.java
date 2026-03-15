@@ -1,5 +1,6 @@
 package com.cabbie.driver.controller;
 
+import com.cabbie.driver.dto.DriverLocationRequest;
 import com.cabbie.driver.dto.DriverRequest;
 import com.cabbie.driver.dto.DriverResponse;
 import com.cabbie.driver.service.DriverService;
@@ -33,12 +34,22 @@ public class DriverController {
 
     @PatchMapping("/update-status")
     public ResponseEntity<String> updateDriverStatus(@RequestHeader("X-User-Email") String email,
-                                                     Map<String, String> status)
+                                                     @RequestBody Map<String, String> status)
     {
         boolean updatedStatus = driverService.statusUpdate(status.get("status"), email);
         if(updatedStatus)
             return ResponseEntity.ok("Driver status updated successfully");
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/location")
+    public ResponseEntity<String> updateLocation(
+            @RequestBody DriverLocationRequest request,
+            @RequestHeader("X-User-Email") String email) {
+
+        driverService.updateLocation(email, request);
+        return ResponseEntity.ok("Location updated successfully");
+    }
+
 
 }

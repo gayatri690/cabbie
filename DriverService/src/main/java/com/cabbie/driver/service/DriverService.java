@@ -1,16 +1,20 @@
 package com.cabbie.driver.service;
 
+import com.cabbie.driver.dto.DriverLocationRequest;
 import com.cabbie.driver.dto.DriverRequest;
 import com.cabbie.driver.dto.DriverResponse;
 import com.cabbie.driver.dto.UserResponse;
 import com.cabbie.driver.entity.Driver;
+import com.cabbie.driver.entity.DriverLocation;
 import com.cabbie.driver.enums.DriverStatus;
 import com.cabbie.driver.enums.Role;
 import com.cabbie.driver.feignClient.UserServiceClient;
+import com.cabbie.driver.repository.DriverLocationRepository;
 import com.cabbie.driver.repository.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,13 +26,15 @@ public class DriverService {
     @Autowired
     private UserServiceClient userServiceClient;
 
+    @Autowired
+    private DriverLocationRepository driverLocationRepository;
+
     public void registerDriver(String email, DriverRequest driverRequest) {
 
         UserResponse userResponse = userServiceClient.getUserByEmail(email);
         if(!userResponse.getRole().equals(Role.DRIVER)){
             throw new RuntimeException("User is not a driver");
         }
-
         Driver driver = new Driver();
         updateDriverFromRequest(driverRequest, driver, userResponse.getId());
         driverRepository.save(driver);
@@ -36,17 +42,32 @@ public class DriverService {
 
     public DriverResponse getDriverByEmail(String email) {
         UserResponse userResponse = userServiceClient.getUserByEmail(email);
-        return mapToDriverResponse(driverRepository.getByUserId(userResponse.getId()));
+        Driver driver = driverRepository.getByUserId(userResponse.getId());
+        if(driver == null) throw new RuntimeException("Driver ID not found");
+        return mapToDriverResponse(driver);
     }
 
     public boolean statusUpdate(String status, String email) {
         UserResponse userResponse = userServiceClient.getUserByEmail(email);
         Driver driver =  driverRepository.getByUserId(userResponse.getId());
         if(driver != null){
-            driver.setStatus(DriverStatus.valueOf(status));
+            driver.setStatus(DriverStatus.valueOf(status.toUpperCase()));
+            driverRepository.save(driver);
             return true;
         }
         return false;
+    }
+
+    public void updateLocation(String email, DriverLocationRequest request) {
+        UserResponse userResponse = userServiceClient.getUserByEmail(email);
+        Driver driver =  driverRepository.getByUserId(userResponse.getId());
+        if(driver == null) throw new RuntimeException("Driver ID not found");
+        DriverLocation driverLocation = driverLocationRepository.findById(driver.getUserId()).orElse(new DriverLocation());
+        driverLocation.setDriverId(driver.getUserId());
+        driverLocation.setLatitude(request.getLatitude());
+        driverLocation.setLongitude(request.getLongitude());
+        driverLocation.setLastUpdated(LocalDateTime.now());
+        driverLocationRepository.save(driverLocation);
     }
 
     public DriverResponse mapToDriverResponse(Driver d){
@@ -79,6 +100,7 @@ public class DriverService {
         driver.setTotalRides(driverRequest.getTotalRides());
         driver.setIsActive(driverRequest.getIsActive());
     }
+
 
 
 }
