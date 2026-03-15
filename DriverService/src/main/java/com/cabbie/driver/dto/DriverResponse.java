@@ -1,5 +1,6 @@
 package com.cabbie.driver.dto;
 
+import com.cabbie.driver.enums.DriverStatus;
 import lombok.Data;
 
 @Data
@@ -10,7 +11,7 @@ public class DriverResponse {
     private String vehicleNumber;
     private String vehicleType;
     private Integer vehicleCapacity;
-    private String driverStatus;
+    private DriverStatus driverStatus;
     private Double currentLatitude;
     private Double currentLongitude;
     private Double rating;
