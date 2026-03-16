@@ -10,4 +10,7 @@ public interface UserServiceClient {
 
     @GetMapping("/users/findbyemail/{email}")
     UserResponse getUserByEmail(@PathVariable String email);
+
+    @GetMapping("/users/{id}")
+    UserResponse getUserById(@PathVariable Long id);
 }

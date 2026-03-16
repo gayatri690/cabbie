@@ -3,6 +3,7 @@ package com.cabbie.driver.controller;
 import com.cabbie.driver.dto.DriverLocationRequest;
 import com.cabbie.driver.dto.DriverRequest;
 import com.cabbie.driver.dto.DriverResponse;
+import com.cabbie.driver.dto.NearbyDriverResponse;
 import com.cabbie.driver.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,18 @@ public class DriverController {
 
         driverService.updateLocation(email, request);
         return ResponseEntity.ok("Location updated successfully");
+    }
+
+    @GetMapping("/nearby")
+    public ResponseEntity<List<NearbyDriverResponse>> getNearbyDrivers(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(defaultValue = "5") double radius) {
+
+        List<NearbyDriverResponse> drivers =
+                driverService.findNearbyDrivers(latitude, longitude, radius);
+
+        return ResponseEntity.ok(drivers);
     }
 
 

@@ -17,43 +17,25 @@ import java.time.LocalDateTime;
 public class Driver {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
-    // Reference to User Service User
-    //@Column(nullable = false)
     private Long userId;
 
-    // Vehicle details
-    private String vehicleModel;
-
     private String vehicleNumber;
+
+    private String vehicleModel;
 
     private String vehicleType;
 
     private Integer vehicleCapacity;
 
-    // Driver status
     @Enumerated(EnumType.STRING)
     private DriverStatus status;
 
-    // Location (optional for ride matching)
-    private Double currentLatitude;
-
-    private Double currentLongitude;
-
-    // Ratings
     private Double rating;
 
     private Integer totalRides;
 
-    // Account status
     private Boolean isActive;
-
-    // timestamps
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 }

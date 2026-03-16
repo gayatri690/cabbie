@@ -84,4 +84,9 @@ public class UserController {
         }
         return ResponseEntity.ok("Account Deleted Successfully");
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
 }

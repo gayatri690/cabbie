@@ -80,6 +80,13 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        return mapToResponse(user);
+    }
+
     private FavoriteLocationResponse mapToFavoriteLocationsResponse(FavoriteLocation favoriteLocation) {
         FavoriteLocationResponse favoriteLocationResponse = new FavoriteLocationResponse();
         favoriteLocationResponse.setLocationName(favoriteLocation.getLocationName());
@@ -103,6 +110,7 @@ public class UserService {
         userResponse.setLastName(user.getLastName());
         userResponse.setEmail(user.getEmail());
         userResponse.setRole(user.getUserrole());
+        userResponse.setPhone(user.getPhone());
 
         if(user.getAddress() != null){
             AddressDto addressDto = new AddressDto();

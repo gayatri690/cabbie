@@ -2,6 +2,7 @@ package com.cabbie.driver.repository;
 
 import com.cabbie.driver.dto.DriverResponse;
 import com.cabbie.driver.entity.Driver;
+import com.cabbie.driver.enums.DriverStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +12,6 @@ import java.util.List;
 public interface DriverRepository extends JpaRepository<Driver, Long> {
 
     Driver getByUserId(String id);
+
+    List<Driver> findByStatusAndIsActive(DriverStatus status, Boolean isActive);
 }

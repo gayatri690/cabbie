@@ -11,8 +11,6 @@ public class DriverRequest {
     private String vehicleType;
     private Integer vehicleCapacity;
     private String driverStatus;
-    private Double currentLatitude;
-    private Double currentLongitude;
     private Double rating;
     private Integer totalRides;
     private Boolean isActive;

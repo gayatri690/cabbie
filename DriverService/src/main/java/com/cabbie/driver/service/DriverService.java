@@ -1,9 +1,6 @@
 package com.cabbie.driver.service;
 
-import com.cabbie.driver.dto.DriverLocationRequest;
-import com.cabbie.driver.dto.DriverRequest;
-import com.cabbie.driver.dto.DriverResponse;
-import com.cabbie.driver.dto.UserResponse;
+import com.cabbie.driver.dto.*;
 import com.cabbie.driver.entity.Driver;
 import com.cabbie.driver.entity.DriverLocation;
 import com.cabbie.driver.enums.DriverStatus;
@@ -15,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -58,11 +57,86 @@ public class DriverService {
         return false;
     }
 
+    public List<NearbyDriverResponse> findNearbyDrivers(double userLat, double userLng, double radiusKm) {
+
+        // 1. Get all available drivers
+        List<Driver> drivers =
+                driverRepository.findByStatusAndIsActive(DriverStatus.AVAILABLE, true);
+
+        List<NearbyDriverResponse> nearbyDrivers = new ArrayList<>();
+
+        for (Driver driver : drivers) {
+
+            // 2. Get driver location
+            DriverLocation location =
+                    driverLocationRepository.findById(driver.getUserId()).orElse(null);
+
+            if (location == null) continue;
+
+            // 3. Calculate distance
+            double distance = calculateDistance(
+                    userLat,
+                    userLng,
+                    location.getLatitude(),
+                    location.getLongitude()
+            );
+
+            // 4. Filter drivers within radius
+            if (distance <= radiusKm) {
+
+                // 5. Get driver info from User Service
+                UserResponse user =
+                        userServiceClient.getUserById(driver.getUserId());
+
+                NearbyDriverResponse response =
+                        NearbyDriverResponse.builder()
+                                .driverId(driver.getId())
+                                .latitude(location.getLatitude())
+                                .longitude(location.getLongitude())
+                                .driverName(user.getFirstName() + " " + user.getLastName())
+                                .driverPhoneNumber(user.getPhone())
+                                .distance(distance)
+                                .build();
+
+                nearbyDrivers.add(response);
+            }
+        }
+
+        // 6. Sort drivers by distance
+        nearbyDrivers.sort(
+                Comparator.comparingDouble(NearbyDriverResponse::getDistance)
+        );
+
+        return nearbyDrivers;
+    }
+
+    private double calculateDistance(double lat1, double lon1,
+                                     double lat2, double lon2) {
+
+        final int EARTH_RADIUS = 6371; // km
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2)
+                * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS * c;
+    }
+
     public void updateLocation(String email, DriverLocationRequest request) {
         UserResponse userResponse = userServiceClient.getUserByEmail(email);
         Driver driver =  driverRepository.getByUserId(userResponse.getId());
         if(driver == null) throw new RuntimeException("Driver ID not found");
-        DriverLocation driverLocation = driverLocationRepository.findById(driver.getUserId()).orElse(new DriverLocation());
+        DriverLocation driverLocation =
+                driverLocationRepository.findById(driver.getId())
+                        .orElse(new DriverLocation());
+        driverLocation.setDriverId(driver.getId());
         driverLocation.setDriverId(driver.getUserId());
         driverLocation.setLatitude(request.getLatitude());
         driverLocation.setLongitude(request.getLongitude());
@@ -78,8 +152,6 @@ public class DriverService {
         driverResponse.setVehicleType(d.getVehicleType());
         driverResponse.setVehicleCapacity(d.getVehicleCapacity());
         driverResponse.setDriverStatus(DriverStatus.valueOf(d.getStatus().name()));
-        driverResponse.setCurrentLatitude(d.getCurrentLatitude());
-        driverResponse.setCurrentLongitude(d.getCurrentLongitude());
         driverResponse.setRating(d.getRating());
         driverResponse.setTotalRides(d.getTotalRides());
         driverResponse.setIsActive(d.getIsActive());
@@ -94,8 +166,6 @@ public class DriverService {
         driver.setVehicleType(driverRequest.getVehicleType());
         driver.setVehicleCapacity(driverRequest.getVehicleCapacity());
         driver.setStatus(DriverStatus.valueOf(driverRequest.getDriverStatus()));
-        driver.setCurrentLatitude(driverRequest.getCurrentLatitude());
-        driver.setCurrentLongitude(driverRequest.getCurrentLongitude());
         driver.setRating(driverRequest.getRating());
         driver.setTotalRides(driverRequest.getTotalRides());
         driver.setIsActive(driverRequest.getIsActive());
