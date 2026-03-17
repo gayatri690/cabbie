@@ -32,14 +32,4 @@ public class JwtService {
                 .compact();                                          //This converts everything into single string token.
     }
 
-    public String extractUsername(String token) {
-
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
 }

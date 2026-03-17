@@ -12,8 +12,6 @@ public class DriverResponse {
     private String vehicleType;
     private Integer vehicleCapacity;
     private DriverStatus driverStatus;
-    private Double currentLatitude;
-    private Double currentLongitude;
     private Double rating;
     private Integer totalRides;
     private Boolean isActive;
