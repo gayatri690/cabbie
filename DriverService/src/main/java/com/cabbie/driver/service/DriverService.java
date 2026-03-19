@@ -2,13 +2,17 @@ package com.cabbie.driver.service;
 
 import com.cabbie.driver.dto.*;
 import com.cabbie.driver.entity.Driver;
+import com.cabbie.driver.exception.UserServiceUnavailableException;
 import com.cabbie.driver.entity.DriverLocation;
 import com.cabbie.driver.enums.DriverStatus;
 import com.cabbie.driver.enums.Role;
 import com.cabbie.driver.feignClient.UserServiceClient;
 import com.cabbie.driver.repository.DriverLocationRepository;
 import com.cabbie.driver.repository.DriverRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,9 +32,16 @@ public class DriverService {
     @Autowired
     private DriverLocationRepository driverLocationRepository;
 
+    @Autowired
+    @Lazy
+    private DriverService self;
+
     public void registerDriver(String email, DriverRequest driverRequest) {
 
-        UserResponse userResponse = userServiceClient.getUserByEmail(email);
+        UserResponse userResponse = self.getUserByEmailWithResilience(email);
+        if (userResponse.getId() == null) {
+            throw new UserServiceUnavailableException("User service temporarily unavailable");
+        }
         if(!userResponse.getRole().equals(Role.DRIVER)){
             throw new RuntimeException("User is not a driver");
         }
@@ -40,14 +51,20 @@ public class DriverService {
     }
 
     public DriverResponse getDriverByEmail(String email) {
-        UserResponse userResponse = userServiceClient.getUserByEmail(email);
+        UserResponse userResponse = self.getUserByEmailWithResilience(email);
+        if (userResponse.getId() == null) {
+            throw new UserServiceUnavailableException("User service temporarily unavailable");
+        }
         Driver driver = driverRepository.getByUserId(userResponse.getId());
         if(driver == null) throw new RuntimeException("Driver ID not found");
         return mapToDriverResponse(driver);
     }
 
     public boolean statusUpdate(String status, String email) {
-        UserResponse userResponse = userServiceClient.getUserByEmail(email);
+        UserResponse userResponse = self.getUserByEmailWithResilience(email);
+        if (userResponse.getId() == null) {
+            throw new UserServiceUnavailableException("User service temporarily unavailable");
+        }
         Driver driver =  driverRepository.getByUserId(userResponse.getId());
         if(driver != null){
             driver.setStatus(DriverStatus.valueOf(status.toUpperCase()));
@@ -171,6 +188,20 @@ public class DriverService {
         driver.setIsActive(driverRequest.getIsActive());
     }
 
+    @Retry(name = "userService")
+    @CircuitBreaker(name = "userService", fallbackMethod = "fallbackUser")
+    public UserResponse getUserByEmailWithResilience(String email) {
+        System.out.println("Calling user service...");
+        return userServiceClient.getUserByEmail(email);
+    }
+    public UserResponse fallbackUser(String email, Throwable t) {
+        System.out.println("Fallback triggered: " + t.getMessage());
 
+        UserResponse user = new UserResponse();
+        user.setEmail(email);
+        user.setFirstName("Unavailable");
+
+        return user;
+    }
 
 }
