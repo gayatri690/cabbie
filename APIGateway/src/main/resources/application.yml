@@ -20,5 +20,10 @@ spring:
           predicates:
             - Path=/driver/**
 
+        - id: ride-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/rides/**
+
 jwt:
   secret: mySecretKeyForJwtValidation123456
